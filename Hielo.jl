@@ -8,6 +8,7 @@ export contador_segundos
 export Single_cluster_E
 export MultiCluster_E
 export contadorespromedio_beta
+export energiaspromedio_beta
 export tiempo_sistema_S
 export tiempos_S
 export tiempo_sistema_M
@@ -36,10 +37,22 @@ end
 function conf_random(L1::Int,L2::Int,pasos=30)
     old=conf_i(L1,L2)
     for t in 1:pasos
-        new=Single_cluster(old)
+        new=MultiCluster(old)
         new,old=old,new
     end
     old
+end
+
+function indices_primeros(ij,i,j,L1,L2)
+    if ij==1
+        return mod1(i-1,L1),j
+        elseif ij==2
+        return i,mod1(j-1,L2)
+        elseif ij==3
+        return mod1(i+1,L1),j
+        elseif ij==4
+        return i,mod1(j+1,L2)
+    end
 end
 
 function Single_cluster(arreglo::Array{Float64,2})
@@ -64,36 +77,24 @@ function Single_cluster(arreglo::Array{Float64,2})
         new_index_i=Int[]
         new_index_j=Int[]
         for n=1:length(index_i)
-            for ii=0:1
-                inew=mod1(index_i[n]+ii*2-1,L1)
-                jnew=mod1(index_j[n]+ii*2-1,L2)
-                if arreglo[inew,index_j[n]]==colorA && red_bool[inew,index_j[n]]==true
-                    push!(new_index_i,inew)
-                    push!(new_index_j,index_j[n])
-                    red_bool[inew,index_j[n]]=false
-                    arreglo[inew,index_j[n]]=colorB
-                    test=true
-                end
-                if arreglo[inew,index_j[n]]==colorB && red_bool[inew,index_j[n]]==true
-                    push!(new_index_i,inew)
-                    push!(new_index_j,index_j[n])
-                    red_bool[inew,index_j[n]]=false
-                    arreglo[inew,index_j[n]]=colorA
-                    test=true
-                end
-                if arreglo[index_i[n],jnew]==colorA && red_bool[index_i[n],jnew]==true
-                    push!(new_index_i,index_i[n])
-                    push!(new_index_j,jnew)
-                    red_bool[index_i[n],jnew]=false
-                    arreglo[index_i[n],jnew]=colorB
-                    test=true
-                end
-                if arreglo[index_i[n],jnew]==colorB && red_bool[index_i[n],jnew]==true
-                    push!(new_index_i,index_i[n])
-                    push!(new_index_j,jnew)
-                    red_bool[index_i[n],jnew]=false
-                    arreglo[index_i[n],jnew]=colorA
-                    test=true
+            #Primeros vecinos
+            for ij=1:4
+                inew=indices_primeros(ij,index_i[n],index_j[n],L1,L2)[1]
+                jnew=indices_primeros(ij,index_i[n],index_j[n],L1,L2)[2]
+                if red_bool[inew,jnew]==true
+                    if arreglo[inew,jnew]==colorA
+                        push!(new_index_i,inew)
+                        push!(new_index_j,jnew)
+                        red_bool[inew,jnew]=false
+                        arreglo[inew,jnew]=colorB
+                        test=true
+                    elseif arreglo[inew,jnew]==colorB
+                        push!(new_index_i,inew)
+                        push!(new_index_j,jnew)
+                        red_bool[inew,jnew]=false
+                        arreglo[inew,jnew]=colorA
+                        test=true
+                    end
                 end
             end
         end
@@ -128,36 +129,24 @@ function SingleCluster(arreglo::Array{Float64,2},red_bool,i,j,colorA, colorB)
         new_index_i=Int[]
         new_index_j=Int[]
         for n=1:length(index_i)
-            for ii=0:1
-                inew=mod1(index_i[n]+ii*2-1,L1)
-                jnew=mod1(index_j[n]+ii*2-1,L2)
-                if arreglo[inew,index_j[n]]==colorA && red_bool[inew,index_j[n]]==true
-                    push!(new_index_i,inew)
-                    push!(new_index_j,index_j[n])
-                    red_bool[inew,index_j[n]]=false
-                    arreglo[inew,index_j[n]]=colorB
-                    test=true
-                end
-                if arreglo[inew,index_j[n]]==colorB && red_bool[inew,index_j[n]]==true
-                    push!(new_index_i,inew)
-                    push!(new_index_j,index_j[n])
-                    red_bool[inew,index_j[n]]=false
-                    arreglo[inew,index_j[n]]=colorA
-                    test=true
-                end
-                if arreglo[index_i[n],jnew]==colorA && red_bool[index_i[n],jnew]==true
-                    push!(new_index_i,index_i[n])
-                    push!(new_index_j,jnew)
-                    red_bool[index_i[n],jnew]=false
-                    arreglo[index_i[n],jnew]=colorB
-                    test=true
-                end
-                if arreglo[index_i[n],jnew]==colorB && red_bool[index_i[n],jnew]==true
-                    push!(new_index_i,index_i[n])
-                    push!(new_index_j,jnew)
-                    red_bool[index_i[n],jnew]=false
-                    arreglo[index_i[n],jnew]=colorA
-                    test=true
+            #Primeros vecinos
+            for ij=1:4
+                inew=indices_primeros(ij,index_i[n],index_j[n],L1,L2)[1]
+                jnew=indices_primeros(ij,index_i[n],index_j[n],L1,L2)[2]
+                if red_bool[inew,jnew]==true
+                    if arreglo[inew,jnew]==colorA
+                        push!(new_index_i,inew)
+                        push!(new_index_j,jnew)
+                        red_bool[inew,jnew]=false
+                        arreglo[inew,jnew]=colorB
+                        test=true
+                    elseif arreglo[inew,jnew]==colorB
+                        push!(new_index_i,inew)
+                        push!(new_index_j,jnew)
+                        red_bool[inew,jnew]=false
+                        arreglo[inew,jnew]=colorA
+                        test=true
+                    end
                 end
             end
         end
@@ -271,36 +260,24 @@ function Single_cluster_E(β,arreglo_or::Array{Float64,2},ϵ=1.0)
         new_index_i=Int[]
         new_index_j=Int[]
         for n=1:length(index_i)
-            for ii=0:1
-                inew=mod1(index_i[n]+ii*2-1,L1)
-                jnew=mod1(index_j[n]+ii*2-1,L2)
-                if arreglo[inew,index_j[n]]==colorA && red_bool[inew,index_j[n]]==true
-                    push!(new_index_i,inew)
-                    push!(new_index_j,index_j[n])
-                    red_bool[inew,index_j[n]]=false
-                    arreglo[inew,index_j[n]]=colorB
-                    test=true
-                end
-                if arreglo[inew,index_j[n]]==colorB && red_bool[inew,index_j[n]]==true
-                    push!(new_index_i,inew)
-                    push!(new_index_j,index_j[n])
-                    red_bool[inew,index_j[n]]=false
-                    arreglo[inew,index_j[n]]=colorA
-                    test=true
-                end
-                if arreglo[index_i[n],jnew]==colorA && red_bool[index_i[n],jnew]==true
-                    push!(new_index_i,index_i[n])
-                    push!(new_index_j,jnew)
-                    red_bool[index_i[n],jnew]=false
-                    arreglo[index_i[n],jnew]=colorB
-                    test=true
-                end
-                if arreglo[index_i[n],jnew]==colorB && red_bool[index_i[n],jnew]==true
-                    push!(new_index_i,index_i[n])
-                    push!(new_index_j,jnew)
-                    red_bool[index_i[n],jnew]=false
-                    arreglo[index_i[n],jnew]=colorA
-                    test=true
+            #Primeros vecinos
+            for ij=1:4
+                inew=indices_primeros(ij,index_i[n],index_j[n],L1,L2)[1]
+                jnew=indices_primeros(ij,index_i[n],index_j[n],L1,L2)[2]
+                if red_bool[inew,jnew]==true
+                    if arreglo[inew,jnew]==colorA
+                        push!(new_index_i,inew)
+                        push!(new_index_j,jnew)
+                        red_bool[inew,jnew]=false
+                        arreglo[inew,jnew]=colorB
+                        test=true
+                    elseif arreglo[inew,jnew]==colorB
+                        push!(new_index_i,inew)
+                        push!(new_index_j,jnew)
+                        red_bool[inew,jnew]=false
+                        arreglo[inew,jnew]=colorA
+                        test=true
+                    end
                 end
             end
             #Segundos vecinos
@@ -354,38 +331,27 @@ function SingleCluster_E(β,arreglo::Array{Float64,2},red_bool,i,j,colorA,colorB
         new_index_i=Int[]
         new_index_j=Int[]
         for n=1:length(index_i)
-            for ii=0:1
-                inew=mod1(index_i[n]+ii*2-1,L1)
-                jnew=mod1(index_j[n]+ii*2-1,L2)
-                if arreglo[inew,index_j[n]]==colorA && red_bool[inew,index_j[n]]==true
-                    push!(new_index_i,inew)
-                    push!(new_index_j,index_j[n])
-                    red_bool[inew,index_j[n]]=false
-                    arreglo[inew,index_j[n]]=colorB
-                    test=true
-                end
-                if arreglo[inew,index_j[n]]==colorB && red_bool[inew,index_j[n]]==true
-                    push!(new_index_i,inew)
-                    push!(new_index_j,index_j[n])
-                    red_bool[inew,index_j[n]]=false
-                    arreglo[inew,index_j[n]]=colorA
-                    test=true
-                end
-                if arreglo[index_i[n],jnew]==colorA && red_bool[index_i[n],jnew]==true
-                    push!(new_index_i,index_i[n])
-                    push!(new_index_j,jnew)
-                    red_bool[index_i[n],jnew]=false
-                    arreglo[index_i[n],jnew]=colorB
-                    test=true
-                end
-                if arreglo[index_i[n],jnew]==colorB && red_bool[index_i[n],jnew]==true
-                    push!(new_index_i,index_i[n])
-                    push!(new_index_j,jnew)
-                    red_bool[index_i[n],jnew]=false
-                    arreglo[index_i[n],jnew]=colorA
-                    test=true
+           #Primeros vecinos
+            for ij=1:4
+                inew=indices_primeros(ij,index_i[n],index_j[n],L1,L2)[1]
+                jnew=indices_primeros(ij,index_i[n],index_j[n],L1,L2)[2]
+                if red_bool[inew,jnew]==true
+                    if arreglo[inew,jnew]==colorA
+                        push!(new_index_i,inew)
+                        push!(new_index_j,jnew)
+                        red_bool[inew,jnew]=false
+                        arreglo[inew,jnew]=colorB
+                        test=true
+                    elseif arreglo[inew,jnew]==colorB
+                        push!(new_index_i,inew)
+                        push!(new_index_j,jnew)
+                        red_bool[inew,jnew]=false
+                        arreglo[inew,jnew]=colorA
+                        test=true
+                    end
                 end
             end
+            #Segundos vecinos
             segundo=segundos_vecinos(arreglo,index_i[n],index_j[n])
             for ij in 1:4
                 ii_new=indices_segundos(ij,index_i[n],index_j[n],L1,L2)[1]
@@ -457,6 +423,12 @@ function contadorespromedio_beta(configuracion_inicial::Array{Float64,2},β_max=
         out[i]=out[i]/t_max
     end
     out
+end
+
+function energiaspromedio_beta(configuracion_inicial::Array{Float64,2},β_max=5.0,t_max=50,intervalos=20)
+    L1=length(configuracion_inicial[:,1])
+    L2=length(configuracion_inicial[1,:])
+    1-contadorespromedio_beta(configuracion_inicial::Array{Float64,2},β_max,t_max,intervalos)/(L1*L2)
 end
 
 function tiempo_sistema_S(β,original::Array{Float64,2},t_max=1000)
